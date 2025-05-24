@@ -1,5 +1,5 @@
 package com.example.demo.service;
 
 public interface EmailService {
-    void sendVerificationEmail(String to, String verificationUrl);
+	void sendMail(String to, String subject, String content);
 }

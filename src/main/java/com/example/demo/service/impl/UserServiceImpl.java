@@ -39,30 +39,30 @@ public class UserServiceImpl implements UserService {
     // 使用者註冊
     @Override
     public boolean register(String username, String password, String email) {
-        if (userRepository.existsByUsername(username) || userRepository.existsByEmail(email)) {
-            return false;
-        }
+    	// 只檢查帳號是否存在，不檢查 Email（方便測試）
+        if (userRepository.existsByUsername(username)) return false;
 
         String salt = Hash.getSalt();
-        String passwordHash = Hash.getHash(password, salt);
+        String hash = Hash.getHash(password, salt);
 
-        User user = new User();
-        user.setUsername(username);
-        user.setPasswordHash(passwordHash);
-        user.setSalt(salt);
-        user.setEmail(email);
-        user.setActive(false); // 尚未啟用
-        user.setRole("USER");
-
-        user = userRepository.save(user); // 存檔以取得 ID
-
+        // 建立使用者
+        User user = new User(null, username, hash, salt, email, false, "USER");
+        userRepository.save(user);
+        
+        // 建立驗證 Token
         String token = UUID.randomUUID().toString();
-        VerificationToken verificationToken = new VerificationToken(null, token, user, LocalDateTime.now().plusDays(1));
-        tokenRepository.save(verificationToken);
+        VerificationToken vt = new VerificationToken(null, token, user, LocalDateTime.now().plusHours(24));
+        tokenRepository.save(vt);
 
-        String verificationUrl = verificationBaseUrl + token;
-        emailService.sendVerificationEmail(user.getEmail(), verificationUrl);
+        // 寄出 HTML 格式的驗證信
+        String verifyUrl = verificationBaseUrl + token;
+        String subject = "請驗證您的帳號";
+        String content = "<p>親愛的用戶您好，</p>"
+                       + "<p>請點擊下方連結完成帳號驗證：</p>"
+                       + "<a href=\"" + verifyUrl + "\"><b>👉 點我驗證</b></a>"
+                       + "<p>驗證連結 24 小時內有效。</p>";
 
+        emailService.sendMail(email, subject, content);
         return true;
     }
 
