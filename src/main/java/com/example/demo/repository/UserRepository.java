@@ -12,6 +12,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     // 依帳號查詢使用者（可用於登入驗證）
     Optional<User> findByUsername(String username);
+    
+    Optional<User> findByEmail(String email);
 
     // 檢查信箱是否已存在（可用於註冊驗證）
     boolean existsByEmail(String email);

@@ -3,6 +3,7 @@ package com.example.demo.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.exception.CertException;
 import com.example.demo.exception.PasswordInvalidException;
 import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.model.dto.UserCert;
@@ -17,8 +18,8 @@ public class CertServiceImpl implements CertService {
 	private UserRepository userRepository;
 
 	@Override
-	//public UserCert getCert(String username, String password) throws CertException {
-	public UserCert getCert(String username, String password) throws UserNotFoundException, PasswordInvalidException {
+	public UserCert getCert(String username, String password) throws CertException {
+	// public UserCert getCert(String username, String password) throws UserNotFoundException, PasswordInvalidException {
 		// 1. 是否有此人
 		User user = userRepository.getUser(username);
 		if(user == null) {
@@ -29,7 +30,13 @@ public class CertServiceImpl implements CertService {
 		if(!passwordHash.equals(user.getPasswordHash())) {
 			throw new PasswordInvalidException("密碼錯誤");
 		}
-		// 3. 簽發憑證
+		
+		// 3. 驗證信箱
+		if (!Boolean.TRUE.equals(user.getActive())) {
+            throw new CertException("帳號尚未啟用，請先完成信箱驗證");
+        }
+		
+		// 4. 簽發憑證
 		UserCert userCert = new UserCert(user.getUserId(), user.getUsername(), user.getRole());
 		return userCert;
 	}
