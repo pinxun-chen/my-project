@@ -37,7 +37,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<Void>> verifyUser(@RequestParam String token) {
         boolean verified = userService.verifyUser(token);
         if (verified) {
-            return ResponseEntity.ok(ApiResponse.success("帳號驗證成功", null));
+            return ResponseEntity.ok(ApiResponse.success("帳號驗證成功，請登入!", null));
         } else {
             return ResponseEntity.status(400).body(ApiResponse.error(400, "驗證連結無效或已過期"));
         }
@@ -54,7 +54,7 @@ public class UserController {
         } else {
             return ResponseEntity
                     .badRequest()
-                    .body(ApiResponse.error(400, "帳號或信箱已存在"));
+                    .body(ApiResponse.error(400, "使用者名稱已存在!"));
         }
     }
 
